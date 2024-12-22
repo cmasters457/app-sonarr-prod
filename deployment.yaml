@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+  namespace: apps
+  labels:
+    app: sonarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: sonarr
+  template:
+    metadata:
+      labels:
+        app: sonarr
+    spec:
+      containers:
+      - name: sonarr
+        image: linuxserver/sonarr:4.0.11
+        resources:
+          #requests:
+          #  cpu: 500m
+          #  memory: 768Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        env:
+          #- name: PUID
+          #  value: "1000"
+          #- name: PGID
+          #  value: "1000"
+          - name: TZ
+            value: "Australia/Melbourne"
+        volumeMounts:
+          - name: sonarr-config
+            mountPath: /config
+          - name: media-tv
+            mountPath: /mnt/media/tv
+          - name: media-movies
+            mountPath: /mnt/media/movies
+          - name: downloads
+            mountPath: /mnt/media/downloads
+        ports:
+        - containerPort: 8989
+          name: http
+          protocol: TCP
+      volumes:
+      - name: sonarr-config
+        persistentVolumeClaim:
+            claimName: sonarr-pvc
+      - name: media-tv
+        persistentVolumeClaim:
+          claimName: media-tv-pvc
+      - name: media-movies
+        persistentVolumeClaim:
+          claimName: media-movies-pvc
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: downloads-pvc
